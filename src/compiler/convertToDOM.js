@@ -5,8 +5,10 @@ export function convertToVirtualDOM(DOMTemplate) {
     }
 
     Node.children = Node.children.map((child) => {
-      if (typeof child === "string") {
-        let virtualDOM = processVirtualDOMNode(DOMTemplate[`${child}`]());
+      if (typeof child.component === "string") {
+        let virtualDOM = processVirtualDOMNode(
+          DOMTemplate[`${child.component}`](),
+        );
         return virtualDOM;
       } else {
         return child;
@@ -17,4 +19,31 @@ export function convertToVirtualDOM(DOMTemplate) {
   }
 
   return processVirtualDOMNode(DOMTemplate.Root());
+}
+
+export function createElm(tag) {
+  return document.createElement(tag);
+}
+
+export function convertToRealDOM(DOMTree) {
+  function processRealDOMNode(Node) {
+    let elm = createElm(Node.tag);
+
+    if (Node.textContent) {
+      elm.textContent = Node.textContent;
+    }
+
+    if (!Node.children) {
+      return elm;
+    }
+
+    for (const child of Node.children) {
+      elm.appendChild(processRealDOMNode(child));
+    }
+
+    return elm;
+  }
+
+  let realDOM = processRealDOMNode(DOMTree);
+  return realDOM;
 }
